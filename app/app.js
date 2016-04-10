@@ -20,7 +20,7 @@ routes(app);
 
 const server = http.createServer(app);
 
-function startup() {
+const startup = () => {
   databaseAPI.createConnection((err) => {
     if (err) {
       global.WINSTON.error(err);
@@ -33,14 +33,14 @@ function startup() {
       );
     }
   });
-}
+};
 
-function shutdown() {
+const shutdown = () => {
   global.WINSTON.info('Received kill signal, shutdown server...');
   server.close();
   databaseAPI.closeConnection();
   global.WINSTON.info('Server has been successfully shutdown');
-}
+};
 
 process.on ('SIGTERM', shutdown);
 process.on ('SIGINT', shutdown);
