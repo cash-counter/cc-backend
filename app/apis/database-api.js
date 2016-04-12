@@ -32,19 +32,10 @@ function closeConnection() {
   mongoose.connection.close();
 }
 
-function getCollections() {
-  return Rx.Observable.create(observer =>
-    mongoose.connection.db.collections((err, collections) => {
-      if (err) {
-        observer.error(err);
-      } else {
-        observer.next(collections);
-      }
-      observer.complete();
-    }
-  ));
+function dropDatabase() {
+  mongoose.connection.db.dropDatabase();
 }
 
 exports.createConnection = createConnection;
 exports.closeConnection = closeConnection;
-exports.getCollections = getCollections;
+exports.dropDatabase = dropDatabase;

@@ -7,13 +7,13 @@ const Rx = require('rxjs');
  * Creates a new record. All validations and restrictions at database
  * level are declared inside the corresponding model class, along with
  * its schema.
- * @param model mongoose model
+ * @param Model mongoose model
  * @param object
  * @returns Observable
  */
-function insert(model, object) {
+function insert(Model, object) {
   return Rx.Observable.create(observer => {
-    const entity = new model(object);
+    const entity = new Model(object);
     entity.save((err, result) => {
       if (err) {
         observer.error(err);

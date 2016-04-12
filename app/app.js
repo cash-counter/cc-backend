@@ -9,17 +9,20 @@ const routes = require('./routes');
 const Rx = require('rxjs');
 const app = express();
 
-app.set('port', process.env.PORT || 3010);
-
-app.disable('etag');
-
-app.use(bodyParser.json());
-app.use(morgan('dev'));
-routes(app);
+function setup(config) {
+  app.set('port', config.port);
+  if (config.disableCache) {
+    app.disable('etag');
+  }
+  app.use(bodyParser.json());
+  app.use(morgan('dev'));
+  routes(app);
+}
 
 const server = http.createServer(app);
 
-function startup() {
+function startup(config) {
+  setup(config.port, config.disableCache);
   return Rx.Observable.create(observer => {
     databaseAPI.createConnection().subscribe(() => {
       server.listen(app.get('port'), () => {
@@ -39,3 +42,4 @@ function shutdown() {
 
 exports.startup = startup;
 exports.shutdown = shutdown;
+exports.getApp = () => app;
