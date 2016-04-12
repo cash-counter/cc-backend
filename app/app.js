@@ -1,13 +1,12 @@
 'use strict';
 
-global.WINSTON = require('winston');
-
 const express = require('express');
 const http = require('http');
 const morgan = require('morgan');
 const bodyParser = require('body-parser');
 const databaseAPI = require('./apis/database-api');
 const routes = require('./routes');
+const Rx = require('rxjs');
 const app = express();
 
 app.set('port', process.env.PORT || 3010);
@@ -20,29 +19,23 @@ routes(app);
 
 const server = http.createServer(app);
 
-const startup = () => {
-  databaseAPI.createConnection((err) => {
-    if (err) {
-      global.WINSTON.error(err);
-      process.exit(1);
-    } else {
-      server.listen(app.get('port'), () =>
-        global.WINSTON.info(
-          `Server started at ${new Date().toISOString()} on port ${app.get('port')}`
-        )
-      );
-    }
+function startup() {
+  return Rx.Observable.create(observer => {
+    databaseAPI.createConnection().subscribe(() => {
+      server.listen(app.get('port'), () => {
+        observer.next(app);
+        observer.complete();
+      });
+    }, (err) => {
+      observer.error(err);
+    });
   });
-};
+}
 
-const shutdown = () => {
-  global.WINSTON.info('Received kill signal, shutdown server...');
+function shutdown() {
   server.close();
   databaseAPI.closeConnection();
-  global.WINSTON.info('Server has been successfully shutdown');
-};
+}
 
-process.on ('SIGTERM', shutdown);
-process.on ('SIGINT', shutdown);
-
-startup();
+exports.startup = startup;
+exports.shutdown = shutdown;
