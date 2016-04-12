@@ -22,7 +22,7 @@ function setup(config) {
 const server = http.createServer(app);
 
 function startup(config) {
-  setup(config.port, config.disableCache);
+  setup(config);
   return Rx.Observable.create(observer => {
     databaseAPI.createConnection().subscribe(() => {
       server.listen(app.get('port'), () => {
